@@ -1,0 +1,45 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+Assets/AssetStoreTools*
+
+# Cache
+UserSettings/
+MemoryCaptures/
+*.pidb
+*.pdb
+*.mdb
+
+# Generated files
+*.csproj
+*.sln
+*.unityproj
+*.pidb
+*.user
+*.svd
+
+# Rider / VS / VSCode
+.idea/
+.vscode/
+*.DotSettings
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Unity Cloud
+sysinfo.txt
+
+# Packages
+*.unitypackage
+
+# Crash reports
+*.stacktrace
+
+# Collaborate (legacy)
+.collabignore
