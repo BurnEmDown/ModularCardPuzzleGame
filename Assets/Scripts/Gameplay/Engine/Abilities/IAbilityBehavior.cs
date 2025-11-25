@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Gameplay.Engine.Abilities;
 
-namespace Gameplay.Engine.Tiles
+namespace Gameplay.Engine.Abilities
 {
-    public interface IAbilityTile
+    public interface IAbilityBehavior
     {
         bool IsAbilityAvailable { get; }
 

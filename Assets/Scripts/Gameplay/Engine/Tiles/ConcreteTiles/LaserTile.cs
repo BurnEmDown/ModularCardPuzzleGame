@@ -4,26 +4,28 @@ using Gameplay.Engine.Moves;
 
 namespace Gameplay.Engine.Tiles.ConcreteTiles
 {
-    public sealed class LaserTile : MovingTile, IAbilityTile
+    public sealed class LaserTile : Tile, IMovingTile, IAbilityTile
     {
         public bool IsAbilityAvailable { get; }
 
         private int maxMoveDistance = 10;
-        protected override MovementRules MovementRules { get; set; }
+        
+        private readonly IMovementBehavior movementBehavior;
+        private readonly IAbilityBehavior abilityBehavior;
         
         public LaserTile(int id, string typeKey) : base(id, typeKey)
         {
-            MovementRules = new MovementRules(maxMoveDistance, true, true, ObstaclePassRule.CannotPassThrough);
-        }
-        
-        public bool CanUseAbility(AbilityContext context)
-        {
-            throw new System.NotImplementedException();
+            movementBehavior = new DefaultMovementBehavior(new MovementRules(maxMoveDistance, true, true, ObstaclePassRule.CannotPassThrough));
         }
 
         public IReadOnlyList<AbilityOption> GetAbilityOptions(AbilityContext context)
         {
-            throw new System.NotImplementedException();
+            return abilityBehavior.GetAbilityOptions(context);
+        }
+        
+        public IReadOnlyList<MoveOption> GetAvailableMoves(MoveContext context)
+        {
+            return movementBehavior.GetAvailableMoves(context);
         }
     }
 }
