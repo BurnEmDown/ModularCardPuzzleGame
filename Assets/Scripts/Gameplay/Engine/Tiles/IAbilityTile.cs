@@ -5,8 +5,6 @@ namespace Gameplay.Engine.Tiles
 {
     public interface IAbilityTile
     {
-        bool IsAbilityAvailable { get; }
-
         IReadOnlyList<AbilityOption> GetAbilityOptions(AbilityContext context);
     }
 }
