@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GripperDefinitionTile
   m_EditorClassIdentifier: Gameplay::Gameplay.Game.Definitions.TileDefinition
   id: 0
-  typeKey: 
+  typeKey: Gripper
   maxMoveDistance: 1
   allowOrthogonal: 1
-  allowDiagonal: 0
+  allowDiagonal: 1
   passRule: 0

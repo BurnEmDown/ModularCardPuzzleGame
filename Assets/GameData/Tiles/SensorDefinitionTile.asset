@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Gameplay::Gameplay.Game.Definitions.TileDefinition
   id: 0
   typeKey: 
-  maxMoveDistance: 1
-  allowOrthogonal: 1
-  allowDiagonal: 0
-  passRule: 0
+  maxMoveDistance: 10
+  allowOrthogonal: 0
+  allowDiagonal: 1
+  passRule: 1

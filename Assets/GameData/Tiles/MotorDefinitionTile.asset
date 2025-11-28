@@ -17,4 +17,4 @@ MonoBehaviour:
   maxMoveDistance: 1
   allowOrthogonal: 1
   allowDiagonal: 0
-  passRule: 0
+  passRule: 3
