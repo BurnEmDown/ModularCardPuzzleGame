@@ -18,10 +18,10 @@ namespace Gameplay.Game.Definitions
         public ObstaclePassRule passRule = ObstaclePassRule.CannotPassThrough;
 
         //[Header("Ability")]
-        //public AbilityKind abilityKind; // your enum or type key for which ability behavior to use
+        //public AbilityKind abilityKind; // enum or type key for which ability behavior to use
 
         //[Header("Art")]
-        //public Sprite tileSprite;
+        public Sprite tileSprite;
         // maybe color, animation, SFX, etc.
     }
 }
