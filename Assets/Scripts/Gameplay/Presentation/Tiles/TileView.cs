@@ -1,5 +1,6 @@
 using Gameplay.Engine.Tiles;
 using Gameplay.Game.Definitions;
+using UnityCoreKit.Runtime.UserInteractions;
 using UnityEngine;
 using static Gameplay.Engine.Board.Structs;
 
@@ -10,12 +11,16 @@ namespace Gameplay.Presentation.Tiles
     /// Unity view for rendering a tile and forwarding user interaction.
     /// Holds a read-only reference to the engine tile model and its current board position.
     /// </summary>
-    public class TileView : MonoBehaviour
+    public class TileView : MonoBehaviour, IUserInteractionTarget
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
         
         private IReadOnlyModuleTile moduleTile;
         private CellPos boardPosition;
+
+        // IUserInteractionTarget
+        public string InteractionKey => "Tile";
+        public object Model => moduleTile;
         
         /// <summary>
         /// The read-only tile model represented by this view.
@@ -59,5 +64,6 @@ namespace Gameplay.Presentation.Tiles
             boardPosition = newPosition;
         }
 
+        
     }
 }
