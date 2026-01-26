@@ -1,5 +1,6 @@
 #nullable enable
 using System.Collections.Generic;
+using DG.Tweening;
 using Gameplay.Engine.Board;
 using Gameplay.Engine.Tiles;
 using Gameplay.Game.Services;
@@ -35,6 +36,13 @@ namespace Gameplay.Presentation.Board
 
         [Tooltip("Spacing between board cells in world units.")]
         [SerializeField] private Vector2 cellSize = Vector2.one;
+
+        [Header("Animation")]
+        [Tooltip("Duration of tile movement animation in seconds.")]
+        [SerializeField] private float moveDuration = 0.3f;
+
+        [Tooltip("Easing function for tile movement.")]
+        [SerializeField] private Ease moveEase = Ease.OutCubic;
 
         private readonly Dictionary<CellPos, TileView> viewsByPos = new();
 
@@ -105,8 +113,22 @@ namespace Gameplay.Presentation.Board
         }
 
         /// <summary>
-        /// Updates a single view mapping and moves the view in world space.
+        /// Updates a single view mapping and animates the view to the new position using DOTween.
         /// </summary>
+        /// <param name="from">The cell position the tile is moving from.</param>
+        /// <param name="to">The cell position the tile is moving to.</param>
+        /// <remarks>
+        /// <para>
+        /// Uses DOTween for smooth animation with configurable duration and easing.
+        /// The animation automatically cleans up when complete (SetAutoKill).
+        /// </para>
+        /// <para>
+        /// <strong>Animation Properties:</strong>
+        /// - Duration: Configured via <c>moveDuration</c> field (default 0.3s)
+        /// - Easing: Configured via <c>moveEase</c> field (default OutCubic)
+        /// - Auto-cleanup: Tween automatically destroys itself after completion
+        /// </para>
+        /// </remarks>
         public void MoveView(CellPos from, CellPos to)
         {
             if (!viewsByPos.TryGetValue(from, out var view) || view == null)
@@ -116,7 +138,12 @@ namespace Gameplay.Presentation.Board
             viewsByPos[to] = view;
 
             view.SetBoardPosition(to);
-            view.transform.position = BoardToWorld(to);
+
+            // Animate move using DOTween
+            Vector3 targetPosition = BoardToWorld(to);
+            view.transform.DOMove(targetPosition, moveDuration)
+                .SetEase(moveEase)
+                .SetAutoKill(true);
         }
 
         /// <summary>
