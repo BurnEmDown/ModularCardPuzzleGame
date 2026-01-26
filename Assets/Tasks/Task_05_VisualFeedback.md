@@ -117,19 +117,25 @@ private void DeselectTile()
 }
 ```
 
-### Step 3: Add Movement Animation
+### Step 3: Add Movement Animation with DOTween
 **File:** `/Assets/Scripts/Gameplay/Presentation/Board/BoardPresenter.cs`
+
+**Prerequisites:**
+- Install DOTween from Unity Asset Store or OpenUPM
+- Run `Tools → Demigiant → DOTween Utility Panel → Setup DOTween`
+- Add `DOTWEEN_ENABLED` scripting define symbol
 
 **Add field:**
 ```csharp
 [Header("Animation")]
 [SerializeField] private float moveDuration = 0.3f;
+[SerializeField] private Ease moveEase = Ease.OutCubic;
 ```
 
 **Replace MoveView method:**
 ```csharp
 /// <summary>
-/// Updates a single view mapping and animates the view to the new position.
+/// Updates a single view mapping and animates the view to the new position using DOTween.
 /// </summary>
 public void MoveView(CellPos from, CellPos to)
 {
@@ -141,36 +147,26 @@ public void MoveView(CellPos from, CellPos to)
 
     view.SetBoardPosition(to);
 
-    // Animate move instead of instant teleport
-    StartCoroutine(AnimateTileMove(view, BoardToWorld(to)));
-}
-
-private IEnumerator AnimateTileMove(TileView view, Vector3 targetPosition)
-{
-    Vector3 startPosition = view.transform.position;
-    float elapsed = 0f;
-
-    while (elapsed < moveDuration)
-    {
-        elapsed += Time.deltaTime;
-        float t = Mathf.Clamp01(elapsed / moveDuration);
-        
-        // Ease out cubic for smooth deceleration
-        t = 1f - Mathf.Pow(1f - t, 3f);
-        
-        view.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-        yield return null;
-    }
-
-    // Ensure final position is exact
-    view.transform.position = targetPosition;
+    // Animate move using DOTween
+    Vector3 targetPosition = BoardToWorld(to);
+    view.transform.DOMove(targetPosition, moveDuration)
+        .SetEase(moveEase)
+        .SetAutoKill(true);
 }
 ```
 
 **Add using statement:**
 ```csharp
-using System.Collections;
+using DG.Tweening;
 ```
+
+**Why DOTween?**
+- ✅ More performant than coroutines (pooled tweeners, optimized updates)
+- ✅ Built-in easing functions (Ease.OutCubic, Ease.InOutQuad, etc.)
+- ✅ Auto-cleanup (SetAutoKill prevents memory leaks)
+- ✅ Easy to chain, sequence, and combine animations
+- ✅ Supports pause/resume, speed scaling, and callbacks
+- ✅ Industry standard for Unity tweening
 
 ### Step 4: Improve Move Preview Highlights
 **Update MoveHighlight prefab in Unity:**
@@ -192,33 +188,46 @@ using System.Collections;
 // Assign material with glow shader (Unity default: Sprites/Default + emission)
 ```
 
-### Step 5: Add Highlight Pulse Animation (Optional)
+### Step 5: Add Highlight Pulse Animation with DOTween (Optional)
 **File:** Create `/Assets/Scripts/Gameplay/Presentation/Effects/HighlightPulse.cs`
 
 ```csharp
+using DG.Tweening;
 using UnityEngine;
 
 namespace Gameplay.Presentation.Effects
 {
     /// <summary>
-    /// Pulses a sprite renderer's alpha for visual emphasis.
+    /// Pulses a sprite renderer's alpha for visual emphasis using DOTween.
     /// </summary>
     public class HighlightPulse : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer spriteRenderer = null!;
-        [SerializeField] private float pulseSpeed = 2f;
+        [SerializeField] private float pulseDuration = 1f;
         [SerializeField] private float minAlpha = 0.3f;
         [SerializeField] private float maxAlpha = 0.6f;
 
-        private void Update()
+        private Tweener pulseTween;
+
+        private void OnEnable()
         {
             if (spriteRenderer == null)
                 return;
 
-            float alpha = Mathf.Lerp(minAlpha, maxAlpha, (Mathf.Sin(Time.time * pulseSpeed) + 1f) / 2f);
-            Color color = spriteRenderer.color;
-            color.a = alpha;
-            spriteRenderer.color = color;
+            // Kill existing tween if any
+            pulseTween?.Kill();
+
+            // Create looping alpha pulse
+            pulseTween = spriteRenderer.DOFade(maxAlpha, pulseDuration)
+                .From(minAlpha)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetAutoKill(false);
+        }
+
+        private void OnDisable()
+        {
+            pulseTween?.Kill();
         }
     }
 }
@@ -227,7 +236,13 @@ namespace Gameplay.Presentation.Effects
 **Add to MoveHighlight prefab:**
 1. Add HighlightPulse component
 2. Assign spriteRenderer reference
-3. Adjust pulseSpeed/alpha values to taste
+3. Adjust pulseDuration/alpha values to taste
+
+**Advantages over Update():**
+- ✅ No per-frame math calculations (DOTween handles it)
+- ✅ Auto-pauses when object disabled
+- ✅ Smooth sine easing built-in
+- ✅ Easy to modify timing without code changes
 
 ### Step 6: Add Hover Feedback (Optional)
 **File:** `/Assets/Scripts/Gameplay/Presentation/Tiles/TileView.cs`
@@ -307,21 +322,35 @@ using System.Collections; // For IEnumerator
 
 ## Success Criteria
 
-- ✅ Selected tile has clear visual indicator (outline/glow)
-- ✅ Tile movement is animated (smooth transition)
-- ✅ Move highlights are visually appealing (color, pulse)
-- ✅ Animations don't cause performance issues
-- ✅ Visual feedback is instant and responsive
-- ✅ No visual artifacts or flickering
-- ✅ (Optional) Hover feedback works
+- ✅ DOTween Tweeners:** Pooled and optimized by DOTween internally
+- **Pooled Highlights:** Already pooled via PoolManager (no instantiation cost)
+- **Auto-Kill:** Tweens automatically clean up when complete (no memory leaks)
+- **Simultaneous Animations:** DOTween efficiently handles multiple concurrent tweens
 
----
+### Alternative Approaches
+**Manual Coroutines (if DOTween not available):**
+```csharp
+// Fallback without DOTween (less performant, more code)
+private IEnumerator AnimateTileMove(TileView view, Vector3 targetPosition)
+{
+    Vector3 startPosition = view.transform.position;
+    float elapsed = 0f;
+    while (elapsed < moveDuration)
+    {
+        elapsed += Time.deltaTime;
+        float t = Mathf.Clamp01(elapsed / moveDuration);
+        t = 1f - Mathf.Pow(1f - t, 3f); // Ease out cubic
+        view.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+        yield return null;
+    }
+    view.transform.position = targetPosition;
+}
+```
 
-## Notes
-
-### Design Choices
-- **Selection Color:** Yellow/white is standard for selection in most games
-- **Animation Duration:** 0.3s is a good balance (responsive but visible)
+**Scriptable Animation Curves with DOTween:**
+```csharp
+[SerializeField] private AnimationCurve moveCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+view.transform.DOMove(targetPosition, moveDuration).SetEase(moveCurve);sive but visible)
 - **Easing Function:** Ease-out cubic feels natural for movement
 - **Highlight Pulse:** Subtle pulse (2 Hz) draws attention without distraction
 
@@ -331,8 +360,11 @@ using System.Collections; // For IEnumerator
 - **SpriteRenderer Updates:** Minimal CPU cost for alpha/position updates
 
 ### Alternative Approaches
-**DOTween (not included in project):**
-```csharp
+**DOTDOTween not found"** → Install DOTween and run Setup, add DOTWEEN_ENABLED scripting define
+- **"Animation is jerky"** → Check moveDuration > 0 and DOTween is properly initialized
+- **"Tile snaps to position"** → Verify DOTween is installed and tween is being created
+- **"Animation doesn't stop"** → Tweens auto-kill by default; check SetAutoKill(true) is set
+- **"Multiple animations conflict"** → DOTween automatically handles this; new tweens override old ones
 // If using DOTween library (more powerful animation)
 view.transform.DOMove(targetPosition, moveDuration).SetEase(Ease.OutCubic);
 ```
