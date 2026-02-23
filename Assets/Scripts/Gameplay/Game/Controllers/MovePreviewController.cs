@@ -12,6 +12,20 @@ namespace Gameplay.Game.Controllers
     /// Visualizes available move destinations for the selected tile.
     /// Shows highlight indicators at each valid destination cell.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <strong>Visual Design:</strong>
+    /// Uses bright cyan highlights (default) to clearly indicate valid move destinations.
+    /// Highlights are instantiated at each destination position and automatically
+    /// cleaned up when a new tile is selected or the current selection is cleared.
+    /// </para>
+    /// <para>
+    /// <strong>Enhancement Options:</strong>
+    /// - Add HighlightPulse component to prefab for animated pulse effect
+    /// - Configure color via inspector (cyan recommended for visibility)
+    /// - Adjust alpha for subtlety vs prominence balance
+    /// </para>
+    /// </remarks>
     public class MovePreviewController : MonoBehaviour
     {
         [Header("References")]
@@ -20,7 +34,8 @@ namespace Gameplay.Game.Controllers
         [Header("Visual Settings")]
         [SerializeField] private GameObject highlightPrefab = null!;
         [SerializeField] private Transform? highlightParent;
-        [SerializeField] private Color highlightColor = new Color(0, 1, 0, 0.3f);
+        [Tooltip("Color for move destination highlights. Bright cyan recommended.")]
+        [SerializeField] private Color highlightColor = new Color(0f, 1f, 1f, 0.4f); // Bright cyan
 
         private readonly List<GameObject> activeHighlights = new();
         private IBoardState? board;
