@@ -1,12 +1,9 @@
-using GameEvents;
 using Gameplay.Engine.Tiles;
 using Gameplay.Game.Definitions;
-using UnityCoreKit.Runtime.Core.Interfaces;
 using UnityCoreKit.Runtime.Core.Services;
 using UnityCoreKit.Runtime.UserInteractions;
 using UnityCoreKit.Runtime.UserInteractions.Unity;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using static Gameplay.Engine.Board.Structs;
 
 namespace Gameplay.Presentation.Tiles
